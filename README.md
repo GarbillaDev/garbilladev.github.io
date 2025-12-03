@@ -58,7 +58,7 @@ Criar uma aplicação moderna que:
 Este projeto está configurado para funcionar diretamente no GitHub Pages.  
 Basta acessar:
 
-👉 **garbilladev.github.io**
+👉 ** garbilladev.github.io **
 
 ---
 
@@ -80,6 +80,7 @@ Abra um **Issue** ou envie um **Pull Request**.
 
 **Matheus Wickert Garbilla (GarbillaDev)**  
 Desenvolvedor apaixonado por jogos, retro systems e tecnologia web.
+
 
 
 
