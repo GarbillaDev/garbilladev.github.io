@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trabalho Final — Tecnologia · Hackers · Games</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/emulator.css" />
+
+  <!-- Scripts existentes -->
+  <script defer src="assets/js/script.js"></script>
+  <script defer src="assets/js/game.js"></script>
+  <script defer src="assets/js/emulator.js"></script>
+
+  <!-- Emulatrix SNES -->
+  <script>
+    var EmulatrixModule = {
+      locateFile: function(path) {
+        if (path.endsWith(".wasm")) return "wasm/Emulatrix_SuperNintendo.wasm";
+        return path;
+      }
+    };
+  </script>
+  <script src="wasm/Emulatrix_SuperNintendo.js"></script>
+</head>
+<body>
+  <!-- Fundo Matrix -->
+  <canvas id="matrix-bg" class="matrix-bg" aria-hidden="true"></canvas>
+
+  <div class="app-container rgb-border" id="app">
+    <!-- HEADER -->
+    <header class="topbar">
+      <div class="brand">
+        <h1>TF — Tecnologia · Hackers · Games</h1>
+        <p class="tag">História • Ferramentas (contexto & impacto) • Mini-Game educativo</p>
+      </div>
+      <nav class="topnav" id="topnav" aria-label="Navegação principal">
+        <a href="#intro">Início</a>
+        <a href="#tecnologia">Tecnologia</a>
+        <a href="#hardware">Hardware</a>
+        <a href="#ferramentas">Ferramentas</a>
+        <a href="#game">Mini-Game</a>
+        <a href="#games">Emulador Retro</a>
+        <a href="#retro-emulator">Emulatrix SNES</a>
+        <a href="#contato">Contato</a>
+      </nav>
+      <div class="top-controls">
+        <button id="contrast-toggle" title="Alternar tema">⚡</button>
+      </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <main class="main-grid" id="main">
+      <!-- COLUNA ESQUERDA -->
+      <aside class="side left-side">
+        <section class="card">
+          <h3>Resumo rápido</h3>
+          <p>Este trabalho apresenta a evolução da tecnologia, componentes de hardware, perfis e história das ferramentas com enfoque crítico e um mini-game educativo em formato quiz terminal.</p>
+        </section>
+        <section class="card">
+          <h3>Leaderboard</h3>
+          <div id="leaderboard" class="leaderboard" aria-live="polite">
+            <ol id="lb-list"><li>— vazio —</li></ol>
+            <button id="clear-lb">Limpar</button>
+          </div>
+        </section>
+      </aside>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <section class="content" id="content">
+
+        <!-- INÍCIO -->
+        <article id="intro" class="panel">
+          <h2>Início</h2>
+          <p>Bem-vindo. Este projeto agrupa conteúdos sobre história da computação, hardware, ferramentas do universo de segurança (apresentadas em contexto histórico e ético) e um mini-game educativo.</p>
+        </article>
+
+        <!-- TECNOLOGIA -->
+        <article id="tecnologia" class="panel">
+          <h2>Tecnologia — Linha do tempo resumida</h2>
+          <ul class="timeline">
+            <li><strong>Pré-história:</strong> Ábaco e ferramentas mecânicas.</li>
+            <li><strong>1940s:</strong> Mainframes e ENIAC. Programação de baixo nível.</li>
+            <li><strong>1950–1970:</strong> Transístor e circuitos integrados.</li>
+            <li><strong>1971:</strong> Intel 4004 — microprocessadores.</li>
+            <li><strong>2000s:</strong> Multicore e GPUs.</li>
+            <li><strong>2010s–2020s:</strong> Nuvem, IA e computação heterogênea.</li>
+          </ul>
+        </article>
+
+        <!-- HARDWARE -->
+        <article id="hardware" class="panel">
+          <h2>Hardware — CPU / Placa-mãe / GPU (resumo)</h2>
+          <p>Principais componentes e evolução: soquetes, chipsets, litografia, memória, barramentos (PCIe) e impacto em jogos e ciência.</p>
+        </article>
+
+        <!-- FERRAMENTAS -->
+        <article id="ferramentas" class="panel">
+          <h2>Ferramentas (contexto e impacto)</h2>
+          <p>Exemplos: <strong>Nmap</strong>, <strong>Wireshark</strong>, <strong>Metasploit</strong>, <strong>John the Ripper</strong>, <strong>Forensics</strong>. Cada ficha no quiz traz história e impacto — sem instruções práticas.</p>
+        </article>
+
+        <!-- MINI-GAME SIMHACK -->
+        <article id="game" class="panel panel-game">
+          <h2>Mini-Game — SimHack (Quiz Terminal)</h2>
+          <p>Modo quiz: responda perguntas por nível, ganhe pontos, desbloqueie fichas ilustrativas com histórico.</p>
+          <div class="game-wrapper">
+            <div class="terminal-card" role="application">
+              <div class="terminal-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <div class="term-title">simhack@tf:~ /quiz</div>
+              </div>
+              <div id="terminal" class="terminal">
+                <div id="terminal-output" class="terminal-output">Clique em <strong>Iniciar</strong> para começar.</div>
+                <div id="choices" class="choices"></div>
+              </div>
+              <div class="terminal-controls">
+                <div class="left-controls">
+                  <button id="game-start">Iniciar</button>
+                  <button id="game-next" disabled>Próxima</button>
+                  <button id="game-reset">Reiniciar</button>
+                </div>
+                <div class="right-controls">
+                  <div class="scoreline">Score: <strong id="score">0</strong></div>
+                  <div class="scoreline">Nível: <strong id="level">0</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- EMULADOR RETRO -->
+        <article id="games" class="panel">
+          <h2>Emulador Retro</h2>
+          <div id="emulator-root" class="emulator-root">
+            <canvas id="emu-screen" width="512" height="480"></canvas>
+            <div class="emu-controls">
+              <label class="file-btn">
+                <input id="rom-file" type="file" accept=".smc,.sfc,.zip" />
+                Carregar ROM
+              </label>
+              <button id="emu-run">▶️ Iniciar</button>
+              <button id="emu-pause">⏸️ Pausar</button>
+              <button id="emu-reset">🔁 Reset</button>
+            </div>
+            <div id="emu-status" class="emu-status">Nenhuma ROM carregada</div>
+          </div>
+        </article>
+
+        <!-- EMULATRIX SNES -->
+        <article id="retro-emulator" class="panel">
+          <h2>Emulatrix SNES</h2>
+          <p>Carregue uma ROM (.smc/.sfc) e jogue diretamente no navegador com Emulatrix.</p>
+          <div id="emulatrix-root" class="emulator-root">
+            <canvas id="emulatrix-screen" width="512" height="480"></canvas>
+            <div class="emu-controls">
+              <label class="file-btn">
+                <input id="emulatrix-rom" type="file" accept=".smc,.sfc,.zip" />
+                Carregar ROM
+              </label>
+              <button id="emulatrix-run">▶️ Iniciar</button>
+              <button id="emulatrix-pause">⏸️ Pausar</button>
+              <button id="emulatrix-reset">🔁 Reset</button>
+            </div>
+            <div id="emulatrix-status" class="emu-status">Nenhuma ROM carregada</div>
+          </div>
+        </article>
+
+        <!-- CONTATO -->
+        <article id="contato" class="panel">
+          <h2>Contato</h2>
+          <p>Autor: Matheus Wickert Garbilla — email: exemplo@dominio.com</p>
+        </article>
+
+      </section>
+
+      <!-- COLUNA DIREITA -->
+      <aside class="side right-side">
+        <section class="card">
+          <h3>Ferramentas desbloqueadas</h3>
+          <div id="unlocked-list">Nenhuma ainda</div>
+        </section>
+        <section class="card">
+          <h3>Créditos & Observações</h3>
+          <p>Material educativo e histórico. O objetivo é informar e contextualizar.</p>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2025 — Trabalho Final — Matheus Wickert Garbilla</p>
+    </footer>
+  </div>
+
+  <!-- INICIALIZAÇÃO EMULATRIX -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let emu = null;
+      let romData = null;
+
+      EmulatrixModule.onRuntimeInitialized = function() {
+        emu = EmulatrixModule;
+        console.log("Emulatrix pronto!");
+      };
+
+      const romFile = document.getElementById("emulatrix-rom");
+      const runBtn = document.getElementById("emulatrix-run");
+      const pauseBtn = document.getElementById("emulatrix-pause");
+      const resetBtn = document.getElementById("emulatrix-reset");
+      const status = document.getElementById("emulatrix-status");
+
+      romFile.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const arrayBuffer = await file.arrayBuffer();
+        romData = new Uint8Array(arrayBuffer);
+        status.textContent = `ROM carregada: ${file.name}`;
+      });
+
+      runBtn.addEventListener("click", () => {
+        if (!romData || !emu) return alert("Carregue uma ROM primeiro!");
+        const filename = romFile.files[0].name;
+        emu.FS_createDataFile("/", filename, romData, true, true);
+        emu.ccall("EmulatrixRunROM", null, ["string"], ["/" + filename]);
+        status.textContent = "Emulador rodando!";
+      });
+
+      pauseBtn.addEventListener("click", () => {
+        if (!emu) return;
+        emu.ccall("EmulatrixPause", null, [], []);
+        status.textContent = "Emulador pausado.";
+      });
+
+      resetBtn.addEventListener("click", () => {
+        if (!emu) return;
+        emu.ccall("EmulatrixReset", null, [], []);
+        status.textContent = "Emulador resetado!";
+      });
+    });
+  </script>
+</body>
+</html>

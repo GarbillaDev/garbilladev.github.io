@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone Nmap">
+  <circle cx="40" cy="40" r="36" fill="#002b2a" stroke="#00ffd5" stroke-width="2"/>
+  <text x="40" y="46" font-family="monospace" font-size="14" fill="#bfffe7" text-anchor="middle">Nmap</text>
+</svg>
