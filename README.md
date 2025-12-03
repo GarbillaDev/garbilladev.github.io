@@ -48,12 +48,8 @@ Criar uma aplicação moderna que:
 │ ├── bios.js
 │ ├── os-core.js
 │ ├── emulatrix.js
-│── /roms (opcional - não enviado ao GitHub)
+│── /roms - não enviado ao GitHub)
 
-
-
-> 🔒 *Importante:* ROMs geralmente **não devem ser enviadas ao GitHub** por questões legais.  
-> Suba apenas exemplos livres ou deixe o usuário carregar as próprias ROMs.
 
 ---
 
@@ -84,4 +80,5 @@ Abra um **Issue** ou envie um **Pull Request**.
 
 **Matheus Wickert Garbilla (GarbillaDev)**  
 Desenvolvedor apaixonado por jogos, retro systems e tecnologia web.
+
 
