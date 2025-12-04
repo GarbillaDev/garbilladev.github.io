@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OverByte - Hacker RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto Mono', monospace; background-color: #0d1117; color: #c9d1d9; overflow: hidden; user-select: none; }
+        .hacker-green { color: #39ff14; } .hacker-cyan { color: #00e5ff; } .hacker-red { color: #ff073a; }
+        .hacker-yellow { color: #f1e757; } .hacker-purple { color: #c873ff; } .hacker-blue { color: #4a90e2; }
+
+        .progress-bar-bg { background-color: #30363d; }
+        .progress-bar-fill { background-color: #39ff14; transition: width 0.1s linear; }
+        .progress-bar-detection { background-color: #ff073a; transition: width 0.1s linear; }
+        
+        .btn { background-color: #21262d; border: 1px solid #30363d; transition: all 0.1s ease-in-out; color: #c9d1d9; cursor: pointer; }
+        .btn:hover:not(:disabled) { background-color: #30363d; border-color: #8b949e; transform: translateY(-1px); box-shadow: 0 0 10px rgba(57, 255, 20, 0.2); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { background-color: #161b22; border-color: #30363d; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .main-menu-btn { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1rem; padding: 1rem; width: 100%; margin-bottom: 1rem; }
+        .difficulty-btn { border: 1px solid #30363d; padding: 1rem; width: 100%; text-align: left; transition: all 0.2s; cursor: pointer; background-color: rgba(13, 17, 23, 0.8); }
+        .difficulty-btn:hover { background-color: #30363d; }
+        .difficulty-btn.selected { border: 2px solid #f1e757; box-shadow: 0 0 15px rgba(241, 231, 87, 0.3); background-color: #30363d; }
+        
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        /* Boot screen starts visible */
+        #loading-screen { display: flex; }
+        
+        .story-notification { position: fixed; bottom: 80px; left: 20px; z-index: 9999; background: rgba(13, 17, 23, 0.95); border: 1px solid #30363d; border-left: 4px solid #c873ff; padding: 1rem; border-radius: 4px; max-width: 400px; animation: slideIn 0.5s ease-out; box-shadow: 0 5px 15px rgba(0,0,0,0.8); pointer-events: none; }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        #game-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        #hack-overlay { position: fixed; inset: 0; z-index: 5; pointer-events: none; transition: box-shadow 0.2s ease-in-out; }
+        @keyframes pulse-red { 0% { box-shadow: inset 0 0 50px rgba(255, 10, 58, 0.3); } 50% { box-shadow: inset 0 0 150px rgba(255, 10, 58, 0.8); } 100% { box-shadow: inset 0 0 50px rgba(255, 10, 58, 0.3); } }
+        .hacking-danger { animation: pulse-red 0.8s infinite; }
+
+        /* WINDOWS */
+        .window { position: absolute; min-width: 300px; min-height: 200px; background-color: rgba(22, 27, 34, 0.98); border: 1px solid #30363d; border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,0.9); display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(5px); }
+        .window.maximized { top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; border-radius: 0; }
+        
+        .window-header { padding: 8px 12px; background: linear-gradient(to right, #161b22, #21262d); border-bottom: 1px solid #30363d; cursor: grab; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        .window-header:active { cursor: grabbing; }
+        .window-title { font-weight: bold; font-size: 0.9rem; color: #e0e0e0; }
+        
+        .window-controls { display: flex; gap: 8px; }
+        .win-btn { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
+        .win-btn:hover { opacity: 1; }
+        .win-close { background-color: #ff5f56; }
+        .win-min { background-color: #ffbd2e; }
+        .win-max { background-color: #27c93f; }
+        
+        .window-content { padding: 0; flex-grow: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .scrollable-content { padding: 16px; overflow-y: auto; flex-grow: 1; }
+
+        #start-menu { position: absolute; bottom: 55px; left: 10px; width: 220px; background-color: rgba(22, 27, 34, 0.98); border: 1px solid #30363d; border-radius: 6px; display: none; z-index: 9000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+        .start-item { padding: 12px 16px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: none; background: transparent; color: #c9d1d9; border-bottom: 1px solid #30363d; }
+        .start-item:last-child { border-bottom: none; }
+        .start-item:hover { background-color: #30363d; }
+        .start-item.danger:hover { background-color: #5a1e1e; }
+
+        /* ATM INTERFACE */
+        .atm-screen { background: linear-gradient(135deg, #003366, #001a33); color: #e0e0e0; height: 100%; display: flex; flex-direction: column; font-family: Arial, sans-serif; }
+        .atm-btn { background: #C0C0C0; color: #000; border: 2px solid #808080; border-top-color: #FFFFFF; border-left-color: #FFFFFF; font-weight: bold; padding: 1rem; text-align: center; cursor: pointer; }
+        .atm-btn:active { border-top-color: #808080; border-left-color: #808080; border-bottom-color: #FFFFFF; border-right-color: #FFFFFF; transform: translateY(1px); }
+        .atm-input { background: #002040; border: 2px inset #001020; color: #39ff14; font-size: 2rem; text-align: center; }
+        
+        /* TERMINAL INPUT FIX */
+        .terminal-input { background: transparent !important; border: none !important; outline: none !important; width: 100%; color: #39ff14 !important; font-family: 'Roboto Mono', monospace; }
+        
+        /* Security specific */
+        .sec-module { border: 1px solid #30363d; padding: 10px; margin-bottom: 10px; border-radius: 4px; background: rgba(0,0,0,0.3); }
+        .sec-status-light { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 5px currentColor; }
+    </style>
+</head>
+<body class="w-screen h-screen overflow-hidden text-sm md:text-base bg-black">
+
+    <canvas id="game-background"></canvas>
+    <div id="hack-overlay"></div>
+    <div id="ai-battle-layer" class="absolute inset-0 z-50 pointer-events-none"></div>
+
+    <!-- TELA: Carregamento -->
+    <div id="loading-screen" class="screen active bg-black z-[9999]">
+        <div id="boot-sequence" class="text-sm md:text-base w-full max-w-4xl h-80 overflow-hidden font-mono text-green-500 p-4"></div>
+        <div class="w-full max-w-4xl progress-bar-bg rounded-full h-2.5 mt-4"><div id="loading-bar" class="bg-green-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+    </div>
+    
+    <!-- TELA: Menu Principal -->
+    <div id="main-menu-screen" class="screen bg-black z-[9000]">
+        <h1 class="text-7xl font-bold hacker-green glitch-subtle mb-4">OverByte OS</h1>
+        <p class="text-gray-400 mb-12">A realidade é maleável.</p>
+        <div class="space-y-6">
+            <button id="continue-game-btn" class="btn main-menu-btn w-64 py-3 hidden" onclick="loadGame()">Continuar Jogo</button>
+            <button class="btn main-menu-btn w-64 py-3" onclick="showScreen('mode-selection-screen')">Novo Jogo</button>
+        </div>
+    </div>
+    
+    <!-- TELA: Seleção de Modo de Jogo -->
+    <div id="mode-selection-screen" class="screen bg-black z-[9000]">
+        <h2 class="text-4xl font-bold hacker-cyan mb-8">Escolha o Modo de Simulação</h2>
+        <div class="flex gap-8">
+            <button class="btn p-8 rounded-lg w-80 text-center" onclick="setupNewGame('story')"><h3 class="text-2xl hacker-green font-bold mb-2">Modo Carreira</h3><p class="text-sm text-gray-400">A sua história, a sua vingança. Derrube a OmniCorp.</p></button>
+            <button class="btn p-8 rounded-lg w-80 text-center" onclick="setupNewGame('free')"><h3 class="text-2xl hacker-cyan font-bold mb-2">Modo Sandbox</h3><p class="text-sm text-gray-400">A rede é o seu recreio. Sem regras.</p></button>
+        </div>
+        <button class="btn mt-12" onclick="goBack()">Voltar</button>
+    </div>
+
+    <!-- TELA: Seleção de Dificuldade -->
+    <div id="difficulty-screen" class="screen bg-black/95 z-[8000]">
+        <h2 class="text-4xl font-bold hacker-yellow mb-8">Parâmetros de Injeção</h2>
+        <div id="difficulty-options" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 w-full max-w-4xl p-4"></div>
+        <div class="flex gap-4">
+             <button class="btn px-8 py-3" onclick="goBack()">Voltar</button>
+             <button class="btn hacker-green px-8 py-3 text-xl font-bold" onclick="startGame()">INICIAR BOOT</button>
+        </div>
+    </div>
+
+    <!-- TELA: Jogo Principal (Desktop) -->
+    <div id="game-screen" class="screen z-0 overflow-hidden" style="display: none; align-items: flex-start; justify-content: flex-start;">
+         <div id="desktop-icons" class="absolute top-8 left-8 flex flex-col gap-6 z-10"></div>
+         <div id="window-container" class="w-full h-full relative"></div>
+         
+         <div id="start-menu">
+            <div class="start-menu-item" onclick="openWindow('settings'); toggleStartMenu();">Configurações</div>
+            <div class="start-menu-item" onclick="saveGame(); toggleStartMenu();">Salvar Jogo</div>
+            <div class="start-menu-item text-red-500" onclick="quitToMainMenu()">Terminar Sessão</div>
+         </div>
+         
+         <div id="taskbar" class="absolute bottom-0 left-0 right-0 h-16 bg-black/80 border-t border-gray-700 flex items-center justify-between px-4 z-50 backdrop-blur">
+             <div><button class="btn hacker-green font-bold px-4 py-2" onclick="toggleStartMenu()">OverByte OS</button></div>
+             <div id="mission-objective-taskbar" class="hidden text-sm hacker-yellow flex-1 text-center mx-4"></div>
+             <div class="flex items-center gap-4">
+                 <div class="text-sm text-right"><span class="hacker-cyan block">NÍVEL <span id="level-stat">1</span></span><span class="text-xs text-gray-400">SYSTEM</span></div>
+                 <div class="text-sm text-right"><span class="hacker-green block" id="money-display">B$ 50</span><span class="text-xs text-gray-400">LIMPO</span></div>
+                 <div class="w-32"><div class="progress-bar-bg rounded-full h-2"><div id="xp-bar" class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div></div></div>
+             </div>
+         </div>
+    </div>
+    
+    <!-- TELA: Pausa -->
+    <div id="pause-screen" class="screen bg-black/80 z-[100]">
+        <h2 class="text-6xl font-bold hacker-yellow glitch-subtle mb-10">SESSÃO PAUSADA</h2>
+        <div class="space-y-6">
+            <button class="btn main-menu-btn w-64 py-3" onclick="resumeGame()">Continuar</button>
+            <button class="btn main-menu-btn w-64 py-3 hacker-red" onclick="quitToMainMenu()">Sair</button>
+        </div>
+    </div>
+
+    <!-- TELA: Game Over -->
+    <div id="game-over-screen" class="screen bg-black z-[100]">
+        <h1 class="text-8xl font-bold hacker-red glitch-subtle mb-4">CONEXÃO PERDIDA</h1>
+        <p class="text-gray-400 mb-12">O Aegis apagou a sua existência.</p>
+        <button class="btn main-menu-btn w-80 py-3" onclick="quitToMainMenu()">Desconectar</button>
+    </div>
+    
+    <!-- TELA: Lock Screen -->
+    <div id="lock-screen" class="screen bg-black z-[9999]">
+        <div class="text-center">
+            <h1 class="text-6xl font-bold hacker-cyan mb-4">OverByte OS</h1>
+            <p class="mb-8">Sessão Bloqueada</p>
+            <input id="password-input" type="password" class="bg-gray-800 text-center p-2 rounded w-64 text-white" placeholder="Senha">
+            <button class="btn w-64 mt-4" onclick="unlockScreen()">Desbloquear</button>
+        </div>
+    </div>
+
+    <!-- Container para Notificações -->
+    <div id="notification-container"></div>
+
+<script>
+// --- DATA DEFINITION (GLOBAL CONSTANT) ---
+const GameData = {
+    difficulties: {
+        muito_facil: { name: 'Muito Fácil', xp: 2.0, money: 2.0, detection: 0.5, desc: "Para iniciantes. Ganhe recursos rapidamente." },
+        facil: { name: 'Fácil', xp: 1.5, money: 1.5, detection: 0.7, desc: "Um desafio leve." },
+        medio: { name: 'Médio', xp: 1.0, money: 1.0, detection: 1.0, desc: "A experiência padrão." },
+        dificil: { name: 'Difícil', xp: 0.8, money: 0.8, detection: 1.5, desc: "Recursos escassos." },
+        impossivel: { name: 'Impossível', xp: 0.5, money: 0.5, detection: 3.0, permadeath: true, desc: "Um erro e game over." }
+    },
+    missions: { 
+        mission1: { title: "Renascimento", description: "Recupere fundos iniciais hackeando o WiFi do café.", objective: { target: 'cafe' }, onStart: "Nyx: Fantasma, aqui é a Nyx. A OmniCorp acha que te apagou. Mostra-lhes que um fantasma nunca morre.", onComplete: "Bom começo. Agora a verdadeira luta começa." },
+        mission2: { title: "Primeira Incursão", description: "Invada o servidor corporativo local.", objective: { target: 'corp_server' }, onStart: "Nyx: Encontrei um servidor local da OmniCorp. Entra e vê o que encontras.", onComplete: "Conseguiste. Estes dados falam de transferências para um banco."}
+    },
+    targets: { 
+        cafe: { id: 'cafe', name: 'WiFi-do-Cafe', reqLvl: 1, baseTime: 10, difficulty: 'Muito Baixa', rewards: { money: 50, xp: 20 }, type: 'civil' }, 
+        traffic: { id: 'traffic', name: 'Sistema de Semáforos', reqLvl: 2, baseTime: 15, difficulty: 'Baixa', rewards: { money: 90, xp: 40 }, type: 'civil' }, 
+        corp_server: { id: 'corp_server', name: 'Servidor Corporativo Local', reqLvl: 3, baseTime: 30, difficulty: 'Baixa', rewards: { money: 250, xp: 100 }, type: 'corp' }, 
+        bank: { id: 'bank', name: 'Banco de Neo-Kyoto', reqLvl: 5, baseTime: 60, difficulty: 'Média', rewards: { money: 1500, xp: 500 }, type: 'elite', minigame: 'brute_force' }
+    },
+    upgrades: { 
+        hardware: { 
+            cpu: [{ name: 'Processador Z-80b', cost: 0, reqLvl: 1 }, { name: 'Chipset Rift 3', cost: 250, reqLvl: 5 }, { name: 'Unidade Quântica Kael', cost: 1500, reqLvl: 15 }], 
+            gpu: [{ name: 'Voodoo2 Basic', cost: 0, reqLvl: 1 }, { name: 'Spectra GFX', cost: 400, reqLvl: 8 }, { name: 'Spectra X900', cost: 3000, reqLvl: 25 }], 
+            ram: [{ name: '256MB SDRAM', cost: 0, reqLvl: 1 }, { name: '8GB DDR5', cost: 200, reqLvl: 4 }, { name: '32GB Neural', cost: 1200, reqLvl: 18 }] 
+        }, 
+        software: { firewall: { name: 'Firewall Adaptativo', level: 0, baseCost: 150, costMulti: 1.6 }, mask: { name: 'Máscara de Rota', level: 0, baseCost: 200, costMulti: 1.8 } }, 
+        infra: { connection: { name: 'Fibra Ótica', level: 0, baseCost: 1000, costMulti: 2.5 }, power: { name: 'Gerador de Backup', level: 0, baseCost: 800, costMulti: 2.2 } },
+        daemon: { analysis: { name: 'Análise Heurística', level: 0, baseCost: 500, costMulti: 2.0 }, defense: { name: 'Contra-medidas Ativas', level: 0, baseCost: 750, costMulti: 2.2 } }
+    },
+    skills: { hacker: { stealth: { name: 'Algoritmos Fantasma', learned: false } }, fantasma: { ghost: { name: 'Modo Fantasma', learned: false } } },
+    npcs: { analyst: { name: 'Oracle', role: 'Analista', cost: 1000 } },
+    market: {
+        items: [
+            { id: 'auto_miner', name: 'Auto-Miner v1.0', cost: 2000, desc: 'Gera 5 B$ a cada 10s.', active: false },
+            { id: 'trace_blocker', name: 'Trace Blocker', cost: 1500, desc: 'Reduz deteção em 10%.', active: false }
+        ]
+    }
+};
+
+// --- GLOBAL STATE ---
+let currentScreenId = 'loading-screen';
+let screenHistory = ['loading-screen'];
+let newGameSettings = { mode: 'free', difficulty: 'medio' };
+let gameState = {};
+let gameLoopInterval = null;
+let highestZ = 100;
+
+// --- SCREEN MANAGEMENT ---
+function showScreen(screenId, isOverlay = false) {
+    if (currentScreenId === screenId) return;
+    document.querySelectorAll('.screen').forEach(s => {
+        if (!s.classList.contains('active') || !isOverlay) {
+            s.style.display = 'none';
+            s.classList.remove('active');
+        }
+    });
+    const screen = document.getElementById(screenId);
+    screen.style.display = 'flex';
+    screen.classList.add('active');
+    if (isOverlay) screenHistory.push(screenId); else screenHistory = [currentScreenId, screenId];
+    currentScreenId = screenId;
+}
+function goBack() {
+    if (screenHistory.length <= 1) { quitToMainMenu(); return; }
+    const current = screenHistory.pop();
+    const previous = screenHistory[screenHistory.length - 1];
+    document.getElementById(current).style.display = 'none';
+    document.getElementById(current).classList.remove('active');
+    document.getElementById(previous).style.display = 'flex';
+    document.getElementById(previous).classList.add('active');
+    currentScreenId = previous;
+}
+
+// --- INITIALIZATION ---
+function setupNewGame(mode) {
+    newGameSettings.mode = mode;
+    populateDifficultyOptions();
+    showScreen('difficulty-screen');
+}
+function populateDifficultyOptions() {
+    const container = document.getElementById('difficulty-options');
+    container.innerHTML = '';
+    for (const key in GameData.difficulties) {
+        const d = GameData.difficulties[key];
+        const btn = document.createElement('button');
+        btn.className = `difficulty-btn mb-2 rounded p-4 bg-gray-800 text-white hover:bg-gray-700 border border-gray-600 ${newGameSettings.difficulty === key ? 'selected' : ''}`;
+        btn.innerHTML = `<div class="font-bold text-lg text-green-400">${d.name}</div><div class="text-sm text-gray-400">${d.desc}</div>`;
+        btn.onclick = () => { newGameSettings.difficulty = key; populateDifficultyOptions(); };
+        container.appendChild(btn);
+    }
+}
+function startGame() {
+    const difficulty = GameData.difficulties[newGameSettings.difficulty];
+    gameState = {
+        level: 1, xp: 0, xpToNextLevel: 100, money: 50, skillPoints: 1, cleanMoney: 0,
+        gameMode: newGameSettings.mode, difficulty: newGameSettings.difficulty, difficultyModifiers: difficulty,
+        isHacking: false, isPaused: false, hackState: {}, inAIBattle: false,
+        reputation: 0, fame: 0, recruitedNPCs: [], crypto: { 'voidCoin': 0 }, market: { voidCoinPrice: 500 }, aegis: { alertLevel: 0 },
+        story: { currentMission: newGameSettings.mode === 'story' ? 'mission1' : null, completedMissions: [] },
+        hardware: { cpu: 0, gpu: 0, ram: 0 },
+        software: JSON.parse(JSON.stringify(GameData.upgrades.software)),
+        infra: JSON.parse(JSON.stringify(GameData.upgrades.infra)),
+        daemon: JSON.parse(JSON.stringify(GameData.upgrades.daemon)),
+        skills: JSON.parse(JSON.stringify(GameData.skills)),
+        security: { doors: {active:false}, blinds: {active:false}, alarm: {active:false}, cameras: {active:false}, jammer: {active:false} },
+        purchasedItems: []
+    };
+    document.getElementById('window-container').innerHTML = '';
+    showScreen('game-screen');
+    document.getElementById('taskbar').style.display = 'flex';
+    if (gameState.gameMode === 'story') startMission(gameState.story.currentMission);
+    populateDesktopIcons();
+    openWindow('terminal');
+    gameLoopInterval = setInterval(gameLoop, 100);
+    updateUI();
+}
+
+// --- GAME LOOP ---
+function gameLoop() {
+    if (gameState.isPaused || !gameState.level) return;
+    if (gameState.isHacking) {
+        const target = GameData.targets[gameState.hackState.key];
+        const cpu = GameData.upgrades.hardware.cpu[gameState.hardware.cpu];
+        const speed = (1.5 * (gameState.hardware.cpu + 1)) / (target.baseTime * 10);
+        gameState.hackState.progress += speed;
+        let risk = (0.1 * gameState.difficultyModifiers.detection);
+        if(!gameState.security.doors.active) risk += 0.05;
+        gameState.hackState.detection += risk;
+        if (gameState.hackState.progress >= 100) endHack(true);
+        else if (gameState.hackState.detection >= 100) endHack(false);
+    }
+    // Passive Income
+    if(gameState.purchasedItems.includes('auto_miner')) {
+         if(Math.random() < 0.01) { gameState.money += 5; logMessage("Auto-Miner: +5 B$", "info"); }
+    }
+    updateUI();
+}
+
+// --- WINDOW MANAGER ---
+function openWindow(id, title, extraData) {
+    const winId = `win-${id}`;
+    if (document.getElementById(winId)) { bringToFront(winId); return; }
+    const win = document.createElement('div');
+    win.id = winId; win.className = 'window'; win.style.zIndex = ++highestZ;
+    let w = 600, h = 400;
+    if (id === 'atm') { w = 380; h = 550; }
+    if (id === 'upgrades') { w = 900; h = 600; }
+    if (id === 'hacking_active') { w = 500; h = 350; }
+    if (id === 'browser') { w = 800; h = 550; }
+    win.style.width = `${w}px`; win.style.height = `${h}px`;
+    win.style.left = `${100 + (Math.random() * 50)}px`; win.style.top = `${100 + (Math.random() * 50)}px`;
+    win.innerHTML = `<div class="window-header" onmousedown="initDrag(event, '${winId}')"><span class="window-title">${title || 'Aplicação'}</span><div class="window-controls"><button class="win-btn win-min" onclick="minWindow('${winId}')"></button><button class="win-btn win-max" onclick="maxWindow('${winId}')"></button><button class="win-btn win-close" onclick="closeWindow('${winId}')"></button></div></div><div class="window-content bg-gray-900 h-full text-white relative">${getAppContent(id, extraData)}</div>`;
+    document.getElementById('window-container').appendChild(win);
+    if (id === 'atm') setTimeout(() => initAtmLogic(), 500);
+    if (id === 'terminal') document.querySelector('.terminal-input').focus();
+}
+function closeWindow(id) { const win = document.getElementById(id); if (win) win.remove(); if (id === 'win-hacking_active') { gameState.isHacking = false; updateUI(); } }
+function bringToFront(id) { const el = document.getElementById(id); if (el) el.style.zIndex = ++highestZ; }
+function minWindow(id) { document.getElementById(id).style.display = 'none'; }
+function maxWindow(id) { document.getElementById(id).classList.toggle('maximized'); }
+
+// --- DRAGGING ---
+let dragEl = null; let startX, startY, startLeft, startTop;
+function initDrag(e, id) { if (e.target.closest('.window-controls')) return; dragEl = document.getElementById(id); bringToFront(id); startX = e.clientX; startY = e.clientY; startLeft = dragEl.offsetLeft; startTop = dragEl.offsetTop; document.addEventListener('mousemove', doDrag); document.addEventListener('mouseup', stopDrag); }
+function doDrag(e) { if (!dragEl) return; e.preventDefault(); const dx = e.clientX - startX; const dy = e.clientY - startY; dragEl.style.left = `${startLeft + dx}px`; dragEl.style.top = `${startTop + dy}px`; }
+function stopDrag() { dragEl = null; document.removeEventListener('mousemove', doDrag); document.removeEventListener('mouseup', stopDrag); }
+
+/* --- CONTENT GENERATORS --- */
+function getAppContent(id, data) {
+    if (id === 'terminal') return `<div id="game-log" class="p-2 h-full overflow-y-auto text-green-500 font-mono text-sm"><div>OverByte OS v3.0</div><div>Type 'help' for commands.</div></div><div class="border-t border-gray-700 p-1 bg-black flex"><span class="text-green-500 mr-2">$</span><input type="text" class="terminal-input" onkeydown="handleTerm(event)"></div>`;
+    if (id === 'atm') return `<div id="atm-wrapper" class="h-full w-full flex items-center justify-center bg-blue-900"></div>`;
+    if (id === 'hacking') return renderTargetsList();
+    if (id === 'hacking_active') return renderActiveHack(data);
+    if (id === 'upgrades') return renderUpgradesList();
+    if (id === 'security') return renderSecurityPanel();
+    if (id === 'rig') return renderRigContent();
+    if (id === 'browser') return renderBrowserContent();
+    return `<div class="p-4">Conteúdo não disponível.</div>`;
+}
+
+function renderTargetsList() {
+    let html = `<div class="p-4 space-y-2 h-full overflow-y-auto">`;
+    for (const key in GameData.targets) {
+        const t = GameData.targets[key];
+        const locked = gameState.level < t.reqLvl;
+        html += `<div class="p-3 border border-gray-700 bg-black/40 rounded flex justify-between items-center ${locked ? 'opacity-50' : ''}"><div><div class="font-bold text-green-400">${t.name}</div><div class="text-xs text-gray-400">Lvl ${t.reqLvl} | ${t.difficulty}</div></div><button class="btn px-3 py-1 text-xs bg-blue-900" onclick="${locked ? '' : `startHack('${key}')`}" ${locked ? 'disabled' : ''}>${locked ? 'BLOQUEADO' : 'INICIAR'}</button></div>`;
+    }
+    return html + `</div>`;
+}
+function renderActiveHack(key) {
+    const t = GameData.targets[key];
+    return `<div class="p-6 flex flex-col h-full justify-center bg-black/90 text-center"><h2 class="text-2xl font-bold text-green-500 mb-2">${t.name}</h2><p class="text-sm text-gray-400 mb-6 animate-pulse">ESTABELECENDO TÚNEL SEGURO...</p><div class="w-full bg-gray-800 h-6 rounded mb-2"><div id="win-hack-prog" class="bg-green-500 h-full rounded" style="width:0%"></div></div><div class="flex justify-between text-xs text-green-400 mb-4"><span>INJEÇÃO</span><span id="prog-text">0%</span></div><div class="w-full bg-gray-800 h-6 rounded mb-2"><div id="win-hack-det" class="bg-red-600 h-full rounded" style="width:0%"></div></div><div class="flex justify-between text-xs text-red-400"><span>DETEÇÃO</span><span id="det-text">0%</span></div></div>`;
+}
+function renderSecurityPanel() {
+    const s = gameState.security;
+    return `<div class="p-4 grid grid-cols-1 gap-4"><div class="bg-black/40 p-3 border border-gray-600 rounded flex justify-between items-center"><span>Portas</span><button class="btn w-24 text-xs ${s.doors.active ? 'text-green-500 border-green-500' : 'text-red-500 border-red-500'}" onclick="toggleSec('doors')">${s.doors.active ? 'TRANCADO' : 'ABERTO'}</button></div><div class="bg-black/40 p-3 border border-gray-600 rounded flex justify-between items-center"><span>Persianas</span><button class="btn w-24 text-xs ${s.blinds.active ? 'text-green-500 border-green-500' : 'text-red-500 border-red-500'}" onclick="toggleSec('blinds')">${s.blinds.active ? 'FECHADO' : 'ABERTO'}</button></div><div class="bg-black/40 p-3 border border-gray-600 rounded flex justify-between items-center"><span>Alarmes</span><button class="btn w-24 text-xs ${s.alarm.active ? 'text-green-500 border-green-500' : 'text-red-500 border-red-500'}" onclick="toggleSec('alarm')">${s.alarm.active ? 'ARMADO' : 'DESARMADO'}</button></div></div>`;
+}
+function renderUpgradesList() {
+    let html = `<div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 h-full overflow-y-auto">`;
+    ['hardware', 'software', 'infra'].forEach(cat => {
+        html += `<div class="bg-black/20 p-2 rounded"><h4 class="text-yellow-500 font-bold mb-2 capitalize">${cat}</h4>`;
+        if(cat === 'hardware') {
+            for(const comp in GameData.upgrades.hardware) {
+                const tier = gameState.hardware[comp];
+                const next = GameData.upgrades.hardware[comp][tier+1];
+                html += `<div class="mb-2 p-2 bg-black/40 rounded"><p class="text-sm font-bold">${comp.toUpperCase()}: ${GameData.upgrades.hardware[comp][tier].name}</p>${next ? `<button class="btn w-full text-xs mt-1" onclick="buyHW('${comp}')">UPGRADE B$${next.cost}</button>` : '<p class="text-xs text-green-500">MAX</p>'}</div>`;
+            }
+        } else {
+            for(const key in gameState[cat]) {
+                const upg = gameState[cat][key];
+                const cost = Math.floor(upg.baseCost * Math.pow(upg.costMulti, upg.level));
+                html += `<div class="mb-2 p-2 bg-black/40 rounded"><p class="text-sm">${upg.name} (Lv${upg.level})</p><button class="btn w-full text-xs mt-1" onclick="buyLevel('${cat}','${key}')">UPGRADE B$${cost}</button></div>`;
+            }
+        }
+        html += `</div>`;
+    });
+    return html + `</div>`;
+}
+function renderRigContent() {
+    const cpu = GameData.upgrades.hardware.cpu[gameState.hardware.cpu];
+    const gpu = GameData.upgrades.hardware.gpu[gameState.hardware.gpu];
+    const ram = GameData.upgrades.hardware.ram[gameState.hardware.ram];
+    return `<div class="p-6 space-y-4"><div class="border p-4 rounded border-cyan-500/50 bg-cyan-900/20"><h3 class="text-xl font-bold text-cyan-400">CPU</h3><p>${cpu.name}</p></div><div class="border p-4 rounded border-green-500/50 bg-green-900/20"><h3 class="text-xl font-bold text-green-400">GPU</h3><p>${gpu.name}</p></div><div class="border p-4 rounded border-purple-500/50 bg-purple-900/20"><h3 class="text-xl font-bold text-purple-400">RAM</h3><p>${ram.name}</p></div></div>`;
+}
+function renderBrowserContent() {
+    let html = `<div class="flex flex-col h-full"><div class="bg-gray-200 p-2 text-black flex gap-2"><input type="text" value="ghost://darknode.onion" class="flex-1 p-1" disabled></div><div class="p-4 bg-gray-100 text-black flex-1 overflow-y-auto"><h1 class="text-2xl font-bold mb-4">DarkNode Market</h1><div class="grid grid-cols-2 gap-4">`;
+    GameData.market.items.forEach(item => {
+        const owned = gameState.purchasedItems && gameState.purchasedItems.includes(item.id);
+        html += `<div class="border p-4 rounded shadow bg-white">
+            <h3 class="font-bold">${item.name}</h3>
+            <p class="text-sm text-gray-600">${item.desc}</p>
+            <p class="font-bold mt-2">B$ ${item.cost}</p>
+            ${owned ? '<span class="text-green-600 font-bold">ADQUIRIDO</span>' : `<button class="btn bg-blue-600 text-white w-full mt-2" onclick="buyMarketItem('${item.id}', ${item.cost})">COMPRAR</button>`}
+        </div>`;
+    });
+    return html + `</div></div></div>`;
+}
+
+// --- ACTIONS ---
+function startHack(key) { if(gameState.isHacking) return; gameState.isHacking=true; gameState.hackState={key:key,progress:0,detection:0}; closeWindow('win-hacking'); openWindow('hacking_active', 'Acesso Remoto', key); }
+function endHack(success) { gameState.isHacking=false; closeWindow('win-hacking_active'); if(success) { const r=Math.floor(GameData.targets[gameState.hackState.key].rewards.money*gameState.difficultyModifiers.money); gameState.money+=r; gameState.xp+=GameData.targets[gameState.hackState.key].rewards.xp; notify("SUCESSO", `+B$ ${r}`); checkMissionCompletion(gameState.hackState.key); if(gameState.xp>=gameState.xpToNextLevel) levelUp(); } else { logMessage("FALHA NO HACK", "danger"); } gameState.hackState={}; updateUI(); }
+function toggleSec(type) { gameState.security[type].active = !gameState.security[type].active; const win=document.getElementById('win-security'); if(win) win.querySelector('.window-content').innerHTML=renderSecurityPanel(); }
+function buyHW(comp) { const tier=gameState.hardware[comp]; const next=GameData.upgrades.hardware[comp][tier+1]; if(next && gameState.cleanMoney>=next.cost && gameState.level>=next.reqLvl) { gameState.cleanMoney-=next.cost; gameState.hardware[comp]++; notify("SISTEMA", `Novo Hardware: ${next.name}`); const win=document.getElementById('win-upgrades'); if(win) win.querySelector('.window-content').innerHTML=renderUpgradesList(); } }
+function buyLevel(cat, key) { const upg=gameState[cat][key]; const cost=Math.floor(upg.baseCost*Math.pow(upg.costMulti,upg.level)); if(gameState.cleanMoney>=cost) { gameState.cleanMoney-=cost; upg.level++; notify("SISTEMA", `${upg.name} melhorado.`); const win=document.getElementById('win-upgrades'); if(win) win.querySelector('.window-content').innerHTML=renderUpgradesList(); } }
+function buyMarketItem(id, cost) { if(gameState.money>=cost) { gameState.money-=cost; if(!gameState.purchasedItems) gameState.purchasedItems=[]; gameState.purchasedItems.push(id); notify("MARKET", "Item adquirido."); const win=document.getElementById('win-browser'); if(win) win.querySelector('.window-content').innerHTML=renderBrowserContent(); } else { notify("ERRO", "Fundos insuficientes."); } }
+
+// --- ATM ---
+function initAtmLogic() { const w=document.getElementById('atm-wrapper'); if(!w)return; w.innerHTML=`<div class="flex flex-col items-center justify-center h-full text-white"><p class="animate-pulse text-green-400">Conectando...</p></div>`; setTimeout(()=>renderAtmPin(w),1500); }
+function renderAtmPin(w) { w.innerHTML=`<div class="h-full flex flex-col items-center justify-center bg-blue-900 text-white"><p class="mb-4 font-bold text-xl">IRON BANK</p><input type="password" id="atm-pin" class="bg-black text-green-500 text-center text-2xl p-2 w-32 mb-4" readonly><div class="grid grid-cols-3 gap-2">${[1,2,3,4,5,6,7,8,9,0].map(n=>`<button class="btn w-12 h-12 bg-gray-200 text-black font-bold" onclick="document.getElementById('atm-pin').value+='${n}'">${n}</button>`).join('')}<button class="btn w-12 h-12 bg-green-600" onclick="if(document.getElementById('atm-pin').value==='1337')renderAtmMenu(document.getElementById('atm-wrapper'));else{alert('PIN ERRADO');document.getElementById('atm-pin').value='';}">OK</button></div></div>`; }
+function renderAtmMenu(w) { w.innerHTML=`<div class="h-full flex flex-col bg-blue-900 text-white p-4"><p>Sujo: B$${gameState.money}</p><p>Limpo: B$${gameState.cleanMoney}</p><button class="btn w-full mt-4 bg-blue-700" onclick="atmLaunder(100)">Lavar 100</button><button class="btn w-full mt-2 bg-blue-700" onclick="atmLaunder(gameState.money)">Lavar Tudo</button><button class="btn w-full mt-auto bg-red-600" onclick="closeWindow('win-atm')">Sair</button></div>`; }
+function atmLaunder(amt) { if(gameState.money>=amt && amt>0) { gameState.money-=amt; gameState.cleanMoney+=Math.floor(amt*0.8); renderAtmMenu(document.getElementById('atm-wrapper')); notify("ATM", "Lavagem concluída."); updateUI(); } }
+
+// --- UTILS ---
+function handleTerm(e) { if(e.key==='Enter'){ const val=e.target.value; document.getElementById('game-log').innerHTML+=`<div><span class="text-green-500">$</span> ${val}</div>`; e.target.value=''; if(val==='save')saveGame(); else if(val==='help')document.getElementById('game-log').innerHTML+=`<div>Commands: help, save, scan</div>`; } }
+function updateUI() { if(!gameState.level)return; document.getElementById('money-display').innerText=`B$ ${gameState.cleanMoney}`; document.getElementById('dirty-money-display').innerText=`B$ ${gameState.money}`; document.getElementById('xp-display').innerText=`${Math.floor(gameState.xp)} XP`; if(gameState.isHacking) { document.getElementById('win-hack-prog').style.width=`${gameState.hackState.progress}%`; document.getElementById('win-hack-det').style.width=`${gameState.hackState.detection}%`; document.getElementById('prog-text').innerText=`${Math.floor(gameState.hackState.progress)}%`; document.getElementById('det-text').innerText=`${Math.floor(gameState.hackState.detection)}%`; const overlay=document.getElementById('hack-overlay'); const r=Math.floor(255*(gameState.hackState.detection/100)); overlay.style.boxShadow=`inset 0 0 100px rgba(${r},${255-r},0,${gameState.hackState.detection/150})`; } else { document.getElementById('hack-overlay').style.boxShadow='none'; } }
+function notify(t,m) { const el=document.createElement('div'); el.className='story-notification'; el.innerHTML=`<div class="font-bold text-cyan-400">${t}</div><div>${m}</div>`; document.getElementById('notification-container').appendChild(el); setTimeout(()=>el.remove(),4000); }
+function checkMissionCompletion(key) { if(gameState.story.currentMission && GameData.missions[gameState.story.currentMission].objective.target===key) { notify("MISSÃO", "Objetivo Cumprido."); gameState.story.completedMissions.push(gameState.story.currentMission); gameState.story.currentMission=null; document.getElementById('mission-objective-taskbar').style.display='none'; } }
+function startMission(id) { const m=GameData.missions[id]; document.getElementById('mission-objective-taskbar').style.display='block'; document.getElementById('mission-objective-taskbar').innerText=m.title; notify("NOVA MISSÃO", m.onStart); }
+function populateDesktopIcons() { const icons=[{id:'terminal',name:'Terminal',icon:'T_'},{id:'hacking',name:'Alvos',icon:'◎'},{id:'upgrades',name:'Upgrades',icon:'↑'},{id:'atm',name:'Rede ATM',icon:'$'},{id:'security',name:'Segurança',icon:'☖'},{id:'rig',name:'Meu Rig',icon:'🖥'},{id:'browser',name:'GhostNet',icon:'🌐'}]; document.getElementById('desktop-icons').innerHTML=icons.map(i=>`<div class="flex flex-col items-center cursor-pointer group mb-4" onclick="openWindow('${i.id}','${i.name}')"><div class="w-14 h-14 bg-gray-800/50 rounded flex items-center justify-center text-2xl text-cyan-400 border border-gray-600 group-hover:bg-gray-700 transition-all shadow-lg">${i.icon}</div><span class="text-xs mt-1 font-bold bg-black/50 px-2 rounded">${i.name}</span></div>`).join(''); }
+function toggleStartMenu() { const m=document.getElementById('start-menu'); m.style.display=m.style.display==='block'?'none':'block'; }
+function saveGame() { localStorage.setItem('overbyte_final_v5', JSON.stringify(gameState)); notify("SISTEMA", "Jogo Salvo."); }
+function loadGame() { const d=localStorage.getItem('overbyte_final_v5'); if(d){ gameState=JSON.parse(d); document.getElementById('window-container').innerHTML=''; showScreen('game-screen'); document.getElementById('taskbar').style.display='flex'; populateDesktopIcons(); gameLoopInterval=setInterval(gameLoop,100); notify("SISTEMA", "Carregado."); } }
+function checkSaveGame() { if(localStorage.getItem('overbyte_final_v5')) document.getElementById('continue-game-btn').classList.remove('hidden'); }
+function quitToMainMenu() { clearInterval(gameLoopInterval); showScreen('main-menu-screen'); document.getElementById('taskbar').style.display='none'; }
+function runBootSequence() { const lines=["BIOS Check... OK", "Loading Kernel... OK", "Starting..."]; const log=document.getElementById('boot-sequence'); let i=0; const int=setInterval(()=>{ if(i>=lines.length){ clearInterval(int); setTimeout(()=>{ document.getElementById('loading-screen').style.display='none'; showScreen('main-menu-screen'); checkSaveGame(); },500); return; } log.innerHTML+=`<div>> ${lines[i]}</div>`; i++; },500); }
+function runBackgroundAnimation() { /* Canvas Logic */ }
+
+document.addEventListener('DOMContentLoaded', () => { runBootSequence(); });
+</script>
+</body>
+</html>
