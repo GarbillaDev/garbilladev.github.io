@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CyberBreach v5.0 - Nexus Responsive</title>
+    <title>CyberBreach v6.0 - Persistence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -16,12 +16,13 @@
                         cyber: {
                             black: '#020205',
                             dark: '#0a0a12',
-                            panel: 'rgba(10, 15, 30, 0.90)',
+                            panel: 'rgba(10, 15, 30, 0.95)',
                             primary: '#00f3ff', /* Cyan */
                             secondary: '#bc13fe', /* Purple */
                             danger: '#ff2a2a',
                             warn: '#ffae00',
-                            success: '#00ff66'
+                            success: '#00ff66',
+                            xp: '#3b82f6'
                         }
                     },
                     fontFamily: {
@@ -31,6 +32,10 @@
                     animation: {
                         'spin-slow': 'spin 10s linear infinite',
                         'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'blink': 'blink 1s step-end infinite',
+                    },
+                    keyframes: {
+                        blink: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } }
                     }
                 }
             }
@@ -46,7 +51,7 @@
                 linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
             background-size: 100% 100%, 40px 40px, 40px 40px;
             color: #e0e0e0;
-            overflow: hidden; /* Prevent body scroll, handle inside containers */
+            overflow: hidden;
         }
 
         /* Glassmorphism Panels */
@@ -59,9 +64,8 @@
         }
 
         .neon-text { text-shadow: 0 0 5px rgba(0, 243, 255, 0.7); }
-        .neon-text-red { text-shadow: 0 0 5px rgba(255, 42, 42, 0.7); }
+        .neon-text-xp { text-shadow: 0 0 5px rgba(59, 130, 246, 0.7); }
         
-        /* Hack Button Styling */
         .btn-tool {
             background: linear-gradient(180deg, rgba(0,20,40,0.9) 0%, rgba(0,10,20,1) 100%);
             border: 1px solid #334455;
@@ -78,22 +82,19 @@
         .btn-tool:active:not(:disabled) { transform: translateY(1px); }
         .btn-tool:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(100%); }
 
-        /* Bars & Visuals */
         .progress-bar { transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .scanline {
-            position: absolute; width: 100%; height: 100%; z-index: 50; pointer-events: none;
+            position: absolute; width: 100%; height: 100%; z-index: 40; pointer-events: none;
             background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3) 51%);
             background-size: 100% 4px;
         }
 
-        /* Critical Heat Animation */
         @keyframes pulse-red {
             0%, 100% { box-shadow: 0 0 5px red; border-color: red; }
             50% { box-shadow: 0 0 20px red; border-color: #ff5555; }
         }
         .critical-heat { animation: pulse-red 1s infinite; }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #00f3ff; border-radius: 2px; }
@@ -103,7 +104,6 @@
             border-left: 3px solid #00f3ff;
         }
 
-        /* Floating Text Animation */
         @keyframes floatUp {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
@@ -122,20 +122,44 @@
 
     <div class="scanline"></div>
 
-    <!-- TOP BAR: Adaptive Header -->
+    <!-- BOOT / LOGIN SCREEN -->
+    <div id="boot-screen" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center font-mono">
+        <div class="text-cyber-primary text-xl md:text-3xl mb-4 tracking-widest animate-pulse">
+            <i class="fas fa-terminal"></i> INICIANDO SESSÃO CRIPTOGRAFADA...
+        </div>
+        <div class="w-64 h-1 bg-gray-800 rounded overflow-hidden">
+            <div id="boot-bar" class="h-full bg-cyber-primary w-0 transition-all duration-[2000ms] ease-out"></div>
+        </div>
+        <div class="mt-4 text-xs text-gray-500" id="boot-text">Carregando módulos de invasão...</div>
+        <button id="btn-start" onclick="startGame()" class="hidden mt-8 border border-cyber-primary text-cyber-primary px-6 py-2 hover:bg-cyber-primary hover:text-black transition uppercase tracking-widest font-bold">
+            ACESSO CONCEDIDO [ENTRAR]
+        </button>
+    </div>
+
+    <!-- TOP BAR -->
     <header class="glass-panel m-1 p-2 flex flex-wrap justify-between items-center z-20 shrink-0 gap-2">
         <div class="flex items-center gap-2 md:gap-4">
             <i class="fas fa-network-wired text-xl md:text-3xl text-cyber-primary animate-pulse"></i>
             <div>
                 <h1 class="text-lg md:text-2xl font-bold tracking-widest text-white neon-text">CYBER<span class="text-cyber-primary">NEXUS</span></h1>
-                <div class="hidden md:block text-[10px] text-cyber-primary/70 font-mono tracking-widest">v5.0 Responsive</div>
+                <div class="hidden md:block text-[10px] text-cyber-primary/70 font-mono tracking-widest">v6.0 Persistent</div>
             </div>
         </div>
 
-        <!-- Global Resources Grid -->
         <div class="flex items-center gap-2 md:gap-6 font-mono text-xs md:text-sm flex-1 justify-end">
+            <!-- XP Bar -->
+            <div class="flex flex-col w-24 hidden md:flex">
+                <div class="flex justify-between text-[10px] mb-0.5">
+                    <span class="text-cyber-xp font-bold">LVL <span id="lvl-display">1</span></span>
+                    <span id="xp-text" class="text-gray-400">0%</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-900 rounded-full overflow-hidden border border-gray-700">
+                    <div id="xp-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
             <!-- Heat -->
-            <div class="flex flex-col w-16 md:w-32">
+            <div class="flex flex-col w-16 md:w-24">
                 <div class="flex justify-between text-[10px] mb-0.5">
                     <span class="text-cyber-danger"><i class="fas fa-fire"></i> HEAT</span>
                     <span id="heat-val">0%</span>
@@ -146,7 +170,7 @@
             </div>
 
             <!-- RAM -->
-            <div class="flex flex-col w-16 md:w-32">
+            <div class="flex flex-col w-16 md:w-24">
                 <div class="flex justify-between text-[10px] mb-0.5">
                     <span class="text-cyber-secondary"><i class="fas fa-microchip"></i> RAM</span>
                     <span id="ram-text">0/0</span>
@@ -164,21 +188,18 @@
         </div>
     </header>
 
-    <!-- MAIN RESPONSIVE LAYOUT -->
+    <!-- MAIN LAYOUT -->
     <main class="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-2 px-2 pb-2 overflow-hidden h-full">
         
-        <!-- LEFT: Target Network (Collapsed on mobile usually, here simplified list) -->
+        <!-- LEFT PANEL -->
         <aside class="lg:col-span-3 glass-panel flex flex-col overflow-hidden max-h-[30vh] lg:max-h-full order-2 lg:order-1">
             <div class="p-2 border-b border-gray-700 flex justify-between items-center bg-cyber-dark/50">
-                <span class="font-bold text-cyber-primary text-xs md:text-sm"><i class="fas fa-globe"></i> REDE GLOBAL</span>
-                <span id="level-badge" class="bg-cyber-primary text-black text-[10px] font-bold px-2 rounded">NVL 1</span>
+                <span class="font-bold text-cyber-primary text-xs md:text-sm"><i class="fas fa-globe"></i> ALVOS DISPONÍVEIS</span>
+                <button onclick="saveGame(true)" class="text-[10px] border border-green-600 text-green-500 px-1 hover:bg-green-900"><i class="fas fa-save"></i> SALVAR</button>
             </div>
             
-            <div id="target-list" class="flex-1 overflow-y-auto p-1 space-y-1">
-                <!-- Targets Injected Here -->
-            </div>
+            <div id="target-list" class="flex-1 overflow-y-auto p-1 space-y-1"></div>
 
-            <!-- Trace & Mode Switcher -->
             <div class="p-2 border-t border-gray-700 bg-black/40 text-xs">
                 <div class="flex justify-between mb-1 font-bold">
                     <span class="text-cyber-danger">RASTREAMENTO</span>
@@ -188,7 +209,6 @@
                     <div id="trace-bar" class="h-full bg-cyber-danger w-0"></div>
                 </div>
                 
-                <!-- NEW COMPLEXITY: RAM MODES -->
                 <div class="flex gap-1">
                     <button onclick="setMode('attack')" id="mode-attack" class="flex-1 border border-red-900 bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white py-1 transition text-[10px] uppercase font-bold text-center active-mode">
                         <i class="fas fa-skull"></i> ATK
@@ -200,31 +220,26 @@
                         <i class="fas fa-eraser"></i> CLR
                     </button>
                 </div>
-                <div class="text-[10px] text-gray-500 mt-1 text-center" id="mode-desc">Modo Ataque: +Dano, +Heat</div>
             </div>
         </aside>
 
-        <!-- CENTER: The Terminal & Deck -->
+        <!-- CENTER PANEL -->
         <section class="lg:col-span-6 flex flex-col gap-2 h-full overflow-hidden order-1 lg:order-2">
             
-            <!-- VISUALIZER (The "Screen") -->
+            <!-- VISUALIZER -->
             <div class="glass-panel flex-1 relative flex flex-col justify-center items-center bg-black/60 overflow-hidden group min-h-[250px]">
-                <!-- Interactive Particle Canvas for Money -->
                 <div id="floating-text-layer" class="absolute inset-0 z-50 pointer-events-none overflow-hidden"></div>
-                
-                <!-- Background Grid -->
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
 
-                <!-- Idle State -->
+                <!-- IDLE -->
                 <div id="idle-screen" class="text-center z-10 opacity-50 p-4">
                     <i class="fas fa-satellite-dish text-4xl md:text-6xl text-gray-600 mb-4 animate-pulse"></i>
-                    <h2 class="text-lg md:text-xl font-mono text-gray-400">SISTEMA EM ESPERA</h2>
-                    <p class="text-xs text-gray-500">Selecione um alvo para iniciar a injeção.</p>
+                    <h2 class="text-lg md:text-xl font-mono text-gray-400">AGUARDANDO UPLINK...</h2>
+                    <p class="text-xs text-gray-500">Selecione um nó na rede para iniciar invasão.</p>
                 </div>
 
-                <!-- Active Hack State -->
+                <!-- HACK ACTIVE -->
                 <div id="hack-screen" class="hidden absolute inset-0 w-full h-full p-4 flex flex-col z-10">
-                    <!-- Target Info -->
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h2 id="target-name" class="text-xl md:text-2xl font-bold text-white neon-text truncate w-40 md:w-auto">TARGET</h2>
@@ -236,21 +251,17 @@
                         </div>
                     </div>
 
-                    <!-- Center HUD -->
                     <div class="flex-1 flex items-center justify-center relative">
                         <div class="w-32 h-32 md:w-48 md:h-48 border-2 border-cyber-primary/20 rounded-full flex items-center justify-center animate-spin-slow absolute"></div>
                         <div class="w-28 h-28 md:w-40 md:h-40 border border-cyber-secondary/30 rounded-full flex items-center justify-center absolute" style="animation-direction: reverse; animation: spin 15s linear infinite;"></div>
                         
-                        <!-- Main Status Text -->
-                        <div class="text-center bg-black/50 p-2 rounded backdrop-blur-sm z-10">
+                        <div class="text-center bg-black/70 p-2 rounded backdrop-blur-sm z-10 border border-gray-800">
                             <div class="text-xs text-gray-400">STATUS</div>
                             <div id="action-log" class="font-mono text-cyber-warn font-bold animate-pulse text-sm md:text-base">CONECTADO</div>
                         </div>
                     </div>
 
-                    <!-- HP BARS -->
                     <div class="mt-auto space-y-3 w-full max-w-lg mx-auto bg-black/40 p-2 rounded border border-gray-800">
-                        <!-- Firewall -->
                         <div>
                             <div class="flex justify-between text-[10px] mb-1">
                                 <span class="text-blue-400 font-bold"><i class="fas fa-shield-alt"></i> FIREWALL</span>
@@ -260,7 +271,6 @@
                                 <div id="firewall-bar" class="h-full bg-blue-500 w-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                             </div>
                         </div>
-                        <!-- Core -->
                         <div>
                             <div class="flex justify-between text-[10px] mb-1">
                                 <span class="text-red-500 font-bold"><i class="fas fa-database"></i> NÚCLEO (DADOS)</span>
@@ -274,126 +284,96 @@
                 </div>
             </div>
 
-            <!-- TOOL BELT (Actions) - Scrollable horizontally on mobile -->
+            <!-- TOOLS -->
             <div class="glass-panel min-h-[140px] md:h-48 p-2 flex flex-col shrink-0">
                 <div class="flex justify-between items-center mb-1 border-b border-gray-700 pb-1">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase">FERRAMENTAS</span>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase">ARSENAL</span>
                     <button onclick="abortHack()" class="text-[10px] text-red-500 border border-red-900 px-2 rounded hover:bg-red-900 hover:text-white">ABORTAR</button>
                 </div>
-                
-                <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 overflow-y-auto h-full pr-1" id="tools-grid">
-                    <!-- Tools injected via JS -->
-                </div>
+                <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 overflow-y-auto h-full pr-1" id="tools-grid"></div>
             </div>
         </section>
 
-        <!-- RIGHT: Upgrades (Hidden on very small screens or stacked) -->
+        <!-- RIGHT PANEL -->
         <aside class="lg:col-span-3 flex flex-col gap-2 h-full overflow-hidden order-3 max-h-[30vh] lg:max-h-full">
-            <!-- Shop Panel -->
             <div class="glass-panel flex-1 flex flex-col overflow-hidden">
                 <div class="p-2 bg-cyber-dark/50 border-b border-gray-700 font-bold text-cyber-secondary flex items-center gap-2 text-xs">
-                    <i class="fas fa-shopping-cart"></i> MERCADO NEGRO
+                    <i class="fas fa-shopping-cart"></i> UPGRADES & BOTNET
                 </div>
-                <div id="shop-list" class="flex-1 overflow-y-auto p-1 space-y-1">
-                    <!-- Upgrades Injected Here -->
-                </div>
+                <div id="shop-list" class="flex-1 overflow-y-auto p-1 space-y-1"></div>
             </div>
 
-            <!-- Log Panel -->
             <div class="glass-panel h-24 lg:h-1/3 flex flex-col font-mono text-[10px] md:text-xs shrink-0">
-                <div class="p-1 bg-black border-b border-gray-800 text-gray-500">CONSOLE.LOG</div>
-                <div id="console-output" class="flex-1 overflow-y-auto p-1 space-y-0.5 text-gray-300 leading-tight">
-                    <div class="text-cyber-primary">> Sistema v5.0 pronto...</div>
-                </div>
+                <div class="p-1 bg-black border-b border-gray-800 text-gray-500">SYSTEM.LOG</div>
+                <div id="console-output" class="flex-1 overflow-y-auto p-1 space-y-0.5 text-gray-300 leading-tight"></div>
             </div>
         </aside>
 
     </main>
 
-    <!-- Overlay for Overheat -->
+    <!-- OVERHEAT OVERLAY -->
     <div id="overheat-overlay" class="hidden absolute inset-0 bg-red-900/40 z-[60] flex items-center justify-center backdrop-blur-sm">
         <div class="bg-black border-2 border-red-600 p-6 md:p-8 text-center shadow-[0_0_50px_red] max-w-sm m-4 rounded-lg">
             <i class="fas fa-temperature-high text-4xl md:text-6xl text-red-500 mb-4 animate-bounce"></i>
             <h2 class="text-2xl md:text-3xl font-bold text-red-500">SUPERAQUECIMENTO!</h2>
-            <p class="text-gray-300 mt-2 text-sm">Resfriamento de emergência em andamento...</p>
+            <p class="text-gray-300 mt-2 text-sm">Protocolo de emergência ativado...</p>
             <div class="w-full h-2 bg-gray-800 mt-4 rounded">
                 <div id="cooldown-bar" class="h-full bg-red-500 w-full rounded"></div>
             </div>
         </div>
     </div>
 
-    <!-- JS LOGIC -->
     <script>
-        // --- CONFIGURATION ---
-        // 'siphon': amount of money stolen per hit immediately
+        // --- GAME DATA ---
         const TOOLS = [
-            { 
-                id: 'brute', name: 'Brute Force', type: 'dmg', 
-                desc: 'Baixo custo, dano leve', 
-                ram: 3, heat: 4, dmg: 8, firewallDmg: 3, time: 800, siphon: 5,
-                icon: 'fa-fist-raised', color: 'text-white' 
-            },
-            { 
-                id: 'icebreaker', name: 'Ice Breaker', type: 'firewall', 
-                desc: 'Focado em Firewall', 
-                ram: 6, heat: 8, dmg: 0, firewallDmg: 20, time: 1500, siphon: 15,
-                icon: 'fa-hammer', color: 'text-blue-400' 
-            },
-            { 
-                id: 'sql', name: 'SQL Inject', type: 'dmg', 
-                desc: 'Dano alto, coleta média', 
-                ram: 12, heat: 18, dmg: 35, firewallDmg: 5, time: 3000, siphon: 50,
-                icon: 'fa-database', color: 'text-red-400' 
-            },
-            { 
-                id: 'data_mine', name: 'Data Miner', type: 'siphon', 
-                desc: 'Focado em roubo ($$$)', 
-                ram: 8, heat: 6, dmg: 5, firewallDmg: 0, time: 1000, siphon: 80,
-                icon: 'fa-magnet', color: 'text-yellow-400' 
-            },
-            { 
-                id: 'botnet', name: 'DDOS Flood', type: 'dmg', 
-                desc: 'Rápido, Muito Heat', 
-                ram: 8, heat: 22, dmg: 18, firewallDmg: 8, time: 600, siphon: 10,
-                icon: 'fa-network-wired', color: 'text-orange-400' 
-            },
-            {
-                id: 'purge', name: 'Coolant', type: 'util',
-                desc: 'Resfria o sistema',
-                ram: 10, heat: -35, dmg: 0, firewallDmg: 0, time: 1200, siphon: 0,
-                icon: 'fa-snowflake', color: 'text-cyan-400'
-            }
+            { id: 'brute', name: 'Brute Force', type: 'dmg', desc: 'Dano leve, baixo custo', ram: 4, heat: 5, dmg: 10, firewallDmg: 2, time: 900, siphon: 5, xp: 5, icon: 'fa-fist-raised', color: 'text-white' },
+            { id: 'icebreaker', name: 'Ice Breaker', type: 'firewall', desc: 'Destrói Firewall', ram: 8, heat: 10, dmg: 0, firewallDmg: 25, time: 1800, siphon: 10, xp: 12, icon: 'fa-hammer', color: 'text-blue-400' },
+            { id: 'sql', name: 'SQL Inject', type: 'dmg', desc: 'Dano alto, coleta média', ram: 15, heat: 25, dmg: 45, firewallDmg: 5, time: 3500, siphon: 60, xp: 20, icon: 'fa-database', color: 'text-red-400' },
+            { id: 'data_mine', name: 'Data Miner', type: 'siphon', desc: 'Focado em roubo ($)', ram: 10, heat: 8, dmg: 5, firewallDmg: 0, time: 1200, siphon: 100, xp: 8, icon: 'fa-magnet', color: 'text-yellow-400' },
+            { id: 'botnet_atk', name: 'Botnet Surge', type: 'dmg', desc: 'Ataque rápido', ram: 10, heat: 30, dmg: 25, firewallDmg: 15, time: 600, siphon: 15, xp: 15, icon: 'fa-network-wired', color: 'text-orange-400' },
+            { id: 'purge', name: 'Coolant', type: 'util', desc: 'Resfria o sistema', ram: 12, heat: -40, dmg: 0, firewallDmg: 0, time: 1500, siphon: 0, xp: 5, icon: 'fa-snowflake', color: 'text-cyan-400' }
         ];
 
         const UPGRADES = [
-            { id: 'cpu', name: 'Quantum CPU', desc: 'Velocidade de Hack', cost: 600, lvl: 1, type: 'speed' },
-            { id: 'ram', name: 'RAM Stick', desc: '+Memória Max', cost: 400, lvl: 1, type: 'ram' },
-            { id: 'cool', name: 'Liquid Cool', desc: 'Resfriamento', cost: 500, lvl: 1, type: 'cooling' },
-            { id: 'siphon', name: 'Sniffer Script', desc: '+Dinheiro por hit', cost: 800, lvl: 1, type: 'siphon' }
+            { id: 'cpu', name: 'Quantum CPU', desc: 'Acelera hacks', cost: 800, lvl: 1, type: 'speed' },
+            { id: 'ram', name: 'RAM Stick', desc: '+Memória Max', cost: 500, lvl: 1, type: 'ram' },
+            { id: 'cool', name: 'Liquid Cool', desc: 'Resfriamento passivo', cost: 600, lvl: 1, type: 'cooling' },
+            { id: 'siphon', name: 'Sniffer Script', desc: '+Dinheiro por hit', cost: 1000, lvl: 1, type: 'siphon' },
+            { id: 'poly', name: 'Polymorphic Code', desc: '-Rastreamento', cost: 1500, lvl: 1, type: 'stealth' },
+            { id: 'botnet', name: 'Botnet Node', desc: 'Renda Passiva ($/s)', cost: 2000, lvl: 0, type: 'income' } // New
         ];
 
-        // --- GAME STATE ---
-        const state = {
+        // --- STATE & PERSISTENCE ---
+        let state = {
             money: 0,
+            xp: 0,
+            xpNext: 100,
             level: 1,
-            ram: 24, maxRam: 24,
-            heat: 0, maxHeat: 100,
+            ram: 32, maxRam: 32,
+            heat: 0,
             trace: 0,
             targets: [],
             activeTarget: null,
             isOverheated: false,
             busy: false,
-            mode: 'attack', // 'attack' or 'stealth'
+            mode: 'attack',
             stats: { 
                 speedMulti: 1, 
-                coolingRate: 0.1, 
+                coolingRate: 0.15, 
                 siphonMulti: 1,
-                traceResist: 0 
+                traceResist: 0,
+                passiveIncome: 0
             }
         };
 
         // --- DOM CACHE ---
         const els = {
+            bootScreen: document.getElementById('boot-screen'),
+            bootBar: document.getElementById('boot-bar'),
+            bootText: document.getElementById('boot-text'),
+            btnStart: document.getElementById('btn-start'),
+            
+            // Resources
             ramBar: document.getElementById('ram-bar'),
             ramText: document.getElementById('ram-text'),
             heatBar: document.getElementById('heat-bar'),
@@ -401,6 +381,11 @@
             money: document.getElementById('money-display'),
             traceBar: document.getElementById('trace-bar'),
             traceVal: document.getElementById('trace-val'),
+            xpBar: document.getElementById('xp-bar'),
+            xpText: document.getElementById('xp-text'),
+            lvlDisplay: document.getElementById('lvl-display'),
+
+            // Lists
             targetList: document.getElementById('target-list'),
             toolsGrid: document.getElementById('tools-grid'),
             shopList: document.getElementById('shop-list'),
@@ -411,7 +396,7 @@
             idleScreen: document.getElementById('idle-screen'),
             hackScreen: document.getElementById('hack-screen'),
             
-            // Active Hack UI
+            // Target
             tName: document.getElementById('target-name'),
             tIp: document.getElementById('target-ip'),
             coreBar: document.getElementById('core-bar'),
@@ -419,50 +404,118 @@
             fwBar: document.getElementById('firewall-bar'),
             fwText: document.getElementById('firewall-text'),
             actionLog: document.getElementById('action-log'),
+            securityLevel: document.getElementById('security-level'),
             
             // Overlay
             overheat: document.getElementById('overheat-overlay'),
             cooldownBar: document.getElementById('cooldown-bar'),
             
-            // Modes
             modeBtnAtk: document.getElementById('mode-attack'),
-            modeBtnStl: document.getElementById('mode-stealth'),
-            modeDesc: document.getElementById('mode-desc')
+            modeBtnStl: document.getElementById('mode-stealth')
         };
 
-        // --- INIT ---
-        function init() {
+        // --- BOOT SEQUENCE ---
+        window.onload = function() {
+            loadGame(); // Load data from LocalStorage
+            
+            // Boot Animation
+            setTimeout(() => els.bootBar.style.width = '100%', 100);
+            setTimeout(() => els.bootText.innerText = "Conectando ao Proxy Seguro...", 800);
+            setTimeout(() => els.bootText.innerText = "Descriptografando Sessão Anterior...", 1600);
+            setTimeout(() => {
+                els.bootText.innerText = "SISTEMA PRONTO.";
+                els.btnStart.classList.remove('hidden');
+            }, 2200);
+        };
+
+        function startGame() {
+            els.bootScreen.style.opacity = '0';
+            setTimeout(() => els.bootScreen.classList.add('hidden'), 500);
+            
+            initGame();
+        }
+
+        function initGame() {
             generateTargets();
             renderTools();
             renderShop();
-            gameLoop();
-            log("Nexus OS v5.0 Loaded. Interface Responsiva Ativada.", "info");
+            updateUI();
+            
+            // Loops
+            requestAnimationFrame(gameLoop);
+            setInterval(passiveTick, 1000); // Passive income every second
+            
+            log("Sessão iniciada. Bem-vindo de volta, Operador.", "info");
         }
 
-        // --- CORE LOOP ---
+        // --- PERSISTENCE ---
+        function saveGame(manual = false) {
+            const saveObj = {
+                money: state.money,
+                xp: state.xp,
+                xpNext: state.xpNext,
+                level: state.level,
+                maxRam: state.maxRam, // Only base stats needs saving, current RAM regens
+                upgrades: UPGRADES.map(u => ({ id: u.id, lvl: u.lvl }))
+            };
+            localStorage.setItem('cyberBreachSave', JSON.stringify(saveObj));
+            if(manual) log("Progresso salvo no disco local.", "success");
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('cyberBreachSave');
+            if(saved) {
+                const data = JSON.parse(saved);
+                state.money = data.money || 0;
+                state.xp = data.xp || 0;
+                state.xpNext = data.xpNext || 100;
+                state.level = data.level || 1;
+                state.maxRam = data.maxRam || 32;
+                state.ram = state.maxRam;
+
+                // Restore Upgrades
+                if(data.upgrades) {
+                    data.upgrades.forEach(savedUpg => {
+                        const upg = UPGRADES.find(u => u.id === savedUpg.id);
+                        if(upg) {
+                            upg.lvl = savedUpg.lvl;
+                            applyUpgradeStats(upg, false); // Apply stats without logging/cost
+                        }
+                    });
+                }
+            }
+        }
+
+        // --- LOOPS ---
+        function passiveTick() {
+            if(state.stats.passiveIncome > 0) {
+                state.money += state.stats.passiveIncome;
+                // No log for passive to avoid spam, maybe update UI only
+            }
+        }
+
         function gameLoop() {
             if(!state.isOverheated) {
-                // RAM Regen (Affected by Mode)
-                let regen = 0.1 * (state.maxRam/20);
-                if(state.mode === 'stealth') regen *= 0.8; // Slower regen in stealth
+                // RAM Regen
+                let regen = 0.15 * (state.maxRam/20);
+                if(state.mode === 'stealth') regen *= 0.7;
                 
                 if(state.ram < state.maxRam) {
                     state.ram = Math.min(state.maxRam, state.ram + regen);
                 }
 
-                // Heat Decay (Cooling)
+                // Heat Decay
                 let cool = state.stats.coolingRate;
-                if(state.mode === 'attack') cool *= 0.8; // Slower cooling in attack mode
+                if(state.mode === 'attack') cool *= 0.8;
                 if(state.heat > 0) {
                     state.heat = Math.max(0, state.heat - cool);
                 }
 
                 // Trace Decay
                 if(!state.activeTarget && state.trace > 0) {
-                    state.trace = Math.max(0, state.trace - 0.05);
+                    state.trace = Math.max(0, state.trace - 0.08);
                 }
             }
-
             updateUI();
             requestAnimationFrame(gameLoop);
         }
@@ -473,23 +526,24 @@
             
             els.heatBar.style.width = state.heat + '%';
             els.heatVal.innerText = Math.floor(state.heat) + '%';
-            
-            if(state.heat > 85) els.heatBar.className = "h-full bg-red-600 critical-heat transition-all duration-100";
-            else els.heatBar.className = "h-full bg-gradient-to-r from-yellow-600 to-red-600 transition-all duration-300";
+            els.heatBar.className = state.heat > 85 ? "h-full bg-red-600 critical-heat" : "h-full bg-gradient-to-r from-yellow-600 to-red-600";
 
             els.traceBar.style.width = state.trace + '%';
             els.traceVal.innerText = Math.floor(state.trace) + '%';
             els.money.innerText = '$' + state.money.toLocaleString();
 
+            // XP
+            const xpPct = (state.xp / state.xpNext) * 100;
+            els.xpBar.style.width = xpPct + '%';
+            els.xpText.innerText = Math.floor(xpPct) + '%';
+            els.lvlDisplay.innerText = state.level;
+
             if(state.activeTarget) {
                 const t = state.activeTarget;
-                const hpPct = (t.hp / t.maxHp) * 100;
-                const fwPct = (t.firewall / t.maxFirewall) * 100;
-                
-                els.coreBar.style.width = hpPct + '%';
-                els.coreText.innerText = Math.floor(hpPct) + '%';
-                els.fwBar.style.width = fwPct + '%';
-                els.fwText.innerText = Math.floor(fwPct) + '%';
+                els.coreBar.style.width = (t.hp / t.maxHp * 100) + '%';
+                els.coreText.innerText = Math.floor(t.hp / t.maxHp * 100) + '%';
+                els.fwBar.style.width = (t.firewall / t.maxFirewall * 100) + '%';
+                els.fwText.innerText = Math.floor(t.firewall / t.maxFirewall * 100) + '%';
             }
         }
 
@@ -498,41 +552,30 @@
             if(mode === 'attack') {
                 els.modeBtnAtk.classList.add('bg-red-500', 'text-white');
                 els.modeBtnStl.classList.remove('bg-blue-500', 'text-white');
-                els.modeDesc.innerText = "MODO ATAQUE: +Dano, +Heat, +Risco";
-                els.modeDesc.className = "text-[10px] text-red-400 mt-1 text-center";
             } else {
                 els.modeBtnStl.classList.add('bg-blue-500', 'text-white');
                 els.modeBtnAtk.classList.remove('bg-red-500', 'text-white');
-                els.modeDesc.innerText = "MODO STEALTH: -Risco, -Regen RAM";
-                els.modeDesc.className = "text-[10px] text-blue-400 mt-1 text-center";
             }
         }
 
-        // --- TARGET LOGIC ---
+        // --- TARGETS ---
         function generateTargets() {
             state.targets = [];
-            const types = [
-                { name: 'LOCAL_SERVER', security: 1, hpMod: 1, rewMod: 1 },
-                { name: 'CLOUD_STORAGE', security: 1.5, hpMod: 1.5, rewMod: 1.5 },
-                { name: 'CORP_MAIN', security: 2, hpMod: 2.5, rewMod: 3 },
-                { name: 'GOV_UPLINK', security: 3, hpMod: 4, rewMod: 5 }
-            ];
+            const prefixes = ['LOCAL', 'CLOUD', 'CORP', 'MIL', 'GOV', 'BLACK_OP'];
             
-            for(let i=0; i<8; i++) {
-                const type = types[Math.floor(Math.random() * Math.min(types.length, state.level + 1))];
+            for(let i=0; i<6; i++) {
                 const lvl = Math.floor(Math.random() * state.level) + 1;
+                const sec = Math.min(5, Math.ceil(lvl/2));
                 
                 state.targets.push({
                     id: i,
-                    name: type.name + "_" + Math.floor(Math.random()*999),
+                    name: `${prefixes[Math.floor(Math.random()*prefixes.length)]}_NODE_${Math.floor(Math.random()*999)}`,
                     ip: `192.168.${Math.floor(Math.random()*99)}.${Math.floor(Math.random()*255)}`,
-                    hp: 100 * type.hpMod * lvl,
-                    maxHp: 100 * type.hpMod * lvl,
-                    firewall: 50 * type.hpMod * lvl,
-                    maxFirewall: 50 * type.hpMod * lvl,
+                    hp: 100 * lvl, maxHp: 100 * lvl,
+                    firewall: 50 * lvl, maxFirewall: 50 * lvl,
                     lvl: lvl,
-                    security: type.security * lvl, // Trace multiplier
-                    reward: 200 * type.rewMod * lvl
+                    security: sec,
+                    reward: 250 * lvl
                 });
             }
             renderTargets();
@@ -551,7 +594,7 @@
                         <div class="text-[10px] text-gray-500 font-mono">${t.ip}</div>
                     </div>
                     <div class="text-right shrink-0 ml-2">
-                        <div class="text-[10px] text-yellow-500">LVL ${t.lvl}</div>
+                        <div class="text-[10px] text-yellow-500">NVL ${t.lvl}</div>
                         <div class="text-[10px] text-green-400 font-mono">$${t.reward}</div>
                     </div>
                 `;
@@ -559,16 +602,12 @@
             });
         }
 
-        function selectTarget(target, el) {
+        function selectTarget(target, div) {
             if(state.busy || state.isOverheated) return;
-            if(target.hp <= 0) {
-                log("Alvo já comprometido.", "warn");
-                return;
-            }
+            if(target.hp <= 0) { log("Alvo neutralizado.", "warn"); return; }
 
             document.querySelectorAll('.target-item').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-
+            div.classList.add('active');
             state.activeTarget = target;
             
             els.idleScreen.classList.add('hidden');
@@ -576,35 +615,33 @@
 
             els.tName.innerText = target.name;
             els.tIp.innerText = target.ip;
+            const secMap = ['MUITO BAIXA', 'BAIXA', 'MÉDIA', 'ALTA', 'EXTREMA'];
+            els.securityLevel.innerText = secMap[target.security-1] || 'DESCONHECIDA';
             
-            const secMap = ['BAIXA', 'MÉDIA', 'ALTA', 'EXTREMA'];
-            els.securityLevel.innerText = secMap[Math.min(3, Math.floor(target.security)-1)] || 'MÉDIA';
-            
-            log(`Uplink estabelecido: ${target.name}`, "info");
+            log(`Conexão estabelecida com ${target.name}.`, "info");
         }
 
         function abortHack() {
             state.activeTarget = null;
             els.idleScreen.classList.remove('hidden');
             els.hackScreen.classList.add('hidden');
-            document.querySelectorAll('.target-item').forEach(e => e.classList.remove('active'));
             els.actionLog.innerText = "DESCONECTADO";
+            document.querySelectorAll('.target-item').forEach(e => e.classList.remove('active'));
         }
 
-        // --- HACKING MECHANICS ---
+        // --- ACTIONS ---
         function renderTools() {
             els.toolsGrid.innerHTML = '';
             TOOLS.forEach(tool => {
                 const btn = document.createElement('button');
                 btn.className = "btn-tool rounded p-1 md:p-2 flex flex-col items-center justify-center gap-1 group relative min-h-[60px]";
                 btn.onclick = () => runTool(tool);
-                
                 btn.innerHTML = `
                     <i class="fas ${tool.icon} text-lg md:text-xl ${tool.color} mb-0.5"></i>
                     <div class="font-bold text-[10px] uppercase leading-none text-center">${tool.name}</div>
                     <div class="text-[9px] text-gray-400 flex gap-2 mt-0.5">
                         <span><i class="fas fa-microchip"></i> ${tool.ram}</span>
-                        <span><i class="fas fa-coins text-yellow-500"></i> ${tool.siphon}</span>
+                        <span>XP ${tool.xp}</span>
                     </div>
                 `;
                 els.toolsGrid.appendChild(btn);
@@ -612,154 +649,143 @@
         }
 
         function runTool(tool) {
-            if(!state.activeTarget && tool.type !== 'util') {
-                log("Selecione um alvo!", "error");
-                return;
-            }
+            if(!state.activeTarget && tool.type !== 'util') { log("Erro: Sem alvo.", "error"); return; }
             if(state.busy || state.isOverheated) return;
-            if(state.ram < tool.ram) {
-                log("Memória RAM insuficiente!", "error");
-                return;
-            }
+            if(state.ram < tool.ram) { log("RAM insuficiente.", "error"); return; }
 
             state.ram -= tool.ram;
             state.busy = true;
             
-            // Speed Calc
-            let duration = tool.time / state.stats.speedMulti;
-            
+            const duration = tool.time / state.stats.speedMulti;
             els.actionLog.innerText = `>>> ${tool.name} <<<`;
             els.actionLog.className = `font-mono font-bold animate-pulse text-sm ${tool.color}`;
 
-            // Buttons lock
             document.querySelectorAll('.btn-tool').forEach(b => b.disabled = true);
 
             setTimeout(() => {
                 applyToolEffect(tool);
                 state.busy = false;
-                els.actionLog.innerText = "PRONTO";
+                els.actionLog.innerText = "AGUARDANDO...";
                 document.querySelectorAll('.btn-tool').forEach(b => b.disabled = false);
             }, duration);
         }
 
         function applyToolEffect(tool) {
-            // Apply Heat
-            let heatGen = tool.heat;
-            if(state.mode === 'attack') heatGen *= 1.2; // Attack mode generates more heat
+            // XP & Money per Action
+            gainXp(tool.xp);
             
             if(tool.effect === 'reduceHeat') {
-                state.heat = Math.max(0, state.heat + tool.heat); 
-                log("Sistemas resfriados.", "info");
+                state.heat = Math.max(0, state.heat + tool.heat);
+                log("Resfriamento forçado executado.", "info");
                 return;
-            } else {
-                state.heat += heatGen;
             }
 
-            if(state.heat >= 100) {
-                triggerOverheat();
-                return;
-            }
+            // Heat Generation
+            let heatGen = tool.heat;
+            if(state.mode === 'attack') heatGen *= 1.2;
+            state.heat += heatGen;
+
+            if(state.heat >= 100) { triggerOverheat(); return; }
 
             const t = state.activeTarget;
             if(!t) return;
 
-            // Damage Calc
+            // Damage & Siphon
             let dmg = tool.dmg;
-            if(state.mode === 'attack') dmg *= 1.3; // Attack mode bonus damage
-
-            // Firewall logic
-            if(t.firewall > 0 && tool.type === 'dmg') {
-                dmg = Math.floor(dmg * 0.3); // Heavy reduction if firewall up
-            }
+            if(state.mode === 'attack') dmg *= 1.3;
+            
+            if(t.firewall > 0 && tool.type === 'dmg') dmg = Math.floor(dmg * 0.25); // Firewall blocks 75%
 
             t.firewall = Math.max(0, t.firewall - tool.firewallDmg);
             t.hp = Math.max(0, t.hp - dmg);
 
-            // SIPHON MECHANIC (Earn money per hit)
-            // Only siphon if damaging successfully
-            if (tool.siphon > 0) {
-                let stolen = Math.floor(tool.siphon * state.stats.siphonMulti);
-                if(t.firewall > 0 && tool.type === 'dmg') stolen = Math.floor(stolen * 0.5); // Less money if blocked
-                
-                state.money += stolen;
-                spawnFloatingText(`+$${stolen}`);
+            // Siphon Money during hack
+            if(tool.siphon > 0) {
+                let cash = Math.floor(tool.siphon * state.stats.siphonMulti);
+                if(t.firewall > 0 && tool.type === 'dmg') cash = Math.floor(cash * 0.3);
+                state.money += cash;
+                spawnFloat(`+$${cash}`, 'text-yellow-400');
             }
 
             // Trace Risk
-            let risk = (tool.heat / 3) * t.security;
-            if(state.mode === 'stealth') risk *= 0.5; // Stealth mode reduction
-            
-            if(Math.random() > 0.3) state.trace += risk;
+            let risk = (tool.heat / 3) * t.security - state.stats.traceResist;
+            if(state.mode === 'stealth') risk *= 0.5;
+            if(Math.random() > 0.4) state.trace += Math.max(0, risk);
             if(state.trace >= 100) gameOver();
 
-            // Win Condition
-            if(t.hp <= 0) {
-                targetDefeated(t);
-            }
+            if(t.hp <= 0) targetDefeated(t);
         }
 
-        function spawnFloatingText(text) {
-            const el = document.createElement('div');
-            el.className = "float-text text-yellow-400 text-lg md:text-2xl";
-            el.innerText = text;
-            
-            // Center random position
-            const x = 40 + Math.random() * 20;
-            const y = 40 + Math.random() * 20;
-            
-            el.style.left = x + "%";
-            el.style.top = y + "%";
-            
-            els.floatLayer.appendChild(el);
-            setTimeout(() => el.remove(), 1000);
+        function gainXp(amount) {
+            state.xp += amount;
+            spawnFloat(`+${amount} XP`, 'text-blue-400');
+            if(state.xp >= state.xpNext) {
+                state.level++;
+                state.xp -= state.xpNext;
+                state.xpNext = Math.floor(state.xpNext * 1.5);
+                state.maxRam += 5;
+                state.ram = state.maxRam;
+                log(`LEVEL UP! Nível ${state.level} alcançado.`, "success");
+                generateTargets(); // Refresh list on level up
+                saveGame();
+            }
         }
 
         function triggerOverheat() {
             state.isOverheated = true;
             state.busy = true;
             els.overheat.classList.remove('hidden');
-            
-            let cooldown = 0;
-            const interval = setInterval(() => {
-                cooldown += 5;
-                els.cooldownBar.style.width = (100 - cooldown) + '%';
-                
-                if(cooldown >= 100) {
-                    clearInterval(interval);
+            let cd = 0;
+            const int = setInterval(() => {
+                cd += 4;
+                els.cooldownBar.style.width = (100-cd)+'%';
+                if(cd >= 100) {
+                    clearInterval(int);
                     state.isOverheated = false;
                     state.busy = false;
-                    state.heat = 50; 
+                    state.heat = 50;
                     els.overheat.classList.add('hidden');
-                    log("Reinicialização concluída.", "warn");
+                    log("Sistema recuperado.", "warn");
                 }
             }, 100);
         }
 
         function targetDefeated(t) {
-            log(`ALVO QUEBRADO: ${t.name} (+$${t.reward})`, "success");
+            log(`ROOT ACCESS: ${t.name} invadido. +$${t.reward}`, "success");
             state.money += t.reward;
-            spawnFloatingText(`ROOT! +$${t.reward}`);
-            state.level++; // Increase global diff slightly
-            
+            spawnFloat(`ROOT! +$${t.reward}`, 'text-green-400 text-xl');
             abortHack();
             generateTargets();
+            saveGame();
         }
 
-        // --- UPGRADES ---
+        function spawnFloat(text, colorClass) {
+            const el = document.createElement('div');
+            el.className = `float-text ${colorClass} text-lg`;
+            el.innerText = text;
+            const x = 40 + Math.random() * 20;
+            const y = 40 + Math.random() * 20;
+            el.style.left = x + "%";
+            el.style.top = y + "%";
+            els.floatLayer.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        // --- SHOP ---
         function renderShop() {
             els.shopList.innerHTML = '';
             UPGRADES.forEach(upg => {
                 const div = document.createElement('div');
                 div.className = "bg-black/30 border border-gray-700 p-2 flex justify-between items-center text-xs";
-                const currentCost = Math.floor(upg.cost * Math.pow(1.5, upg.lvl - 1));
-
+                const cost = Math.floor(upg.cost * Math.pow(1.5, upg.lvl));
+                
                 div.innerHTML = `
                     <div class="flex-1">
                         <div class="font-bold text-cyber-secondary">${upg.name} <span class="text-gray-500 text-[9px]">Lvl ${upg.lvl}</span></div>
                         <div class="text-gray-400 text-[9px]">${upg.desc}</div>
                     </div>
-                    <button onclick="buyUpgrade('${upg.id}', ${currentCost})" class="bg-gray-800 hover:bg-cyber-secondary hover:text-black border border-gray-600 px-2 py-1 transition ml-2 min-w-[50px]">
-                        $${currentCost}
+                    <button onclick="buyUpgrade('${upg.id}', ${cost})" class="bg-gray-800 hover:bg-cyber-secondary hover:text-black border border-gray-600 px-2 py-1 transition ml-2 min-w-[50px]">
+                        $${cost}
                     </button>
                 `;
                 els.shopList.appendChild(div);
@@ -770,27 +796,37 @@
             if(state.money >= cost) {
                 state.money -= cost;
                 const upg = UPGRADES.find(u => u.id === id);
-                upg.lvl++;
-
-                if(upg.type === 'ram') { state.maxRam += 8; state.ram = state.maxRam; }
-                if(upg.type === 'speed') state.stats.speedMulti += 0.15;
-                if(upg.type === 'cooling') state.stats.coolingRate += 0.05;
-                if(upg.type === 'siphon') state.stats.siphonMulti += 0.2;
-
-                log(`${upg.name} atualizado.`, "success");
-                renderShop();
+                if(upg) {
+                    upg.lvl++;
+                    applyUpgradeStats(upg, true);
+                    renderShop();
+                    saveGame();
+                }
             } else {
-                log("Saldo insuficiente.", "error");
+                log("Fundos insuficientes.", "error");
             }
+        }
+
+        function applyUpgradeStats(upg, isNew) {
+            // Apply logic purely based on level (idempotent if possible, or incremental)
+            // Simplified: Re-calculating logic implies static bonuses or counters
+            if(upg.type === 'ram') state.maxRam = 32 + (upg.lvl * 8);
+            if(upg.type === 'speed') state.stats.speedMulti = 1 + (upg.lvl * 0.15);
+            if(upg.type === 'cooling') state.stats.coolingRate = 0.15 + (upg.lvl * 0.05);
+            if(upg.type === 'siphon') state.stats.siphonMulti = 1 + (upg.lvl * 0.2);
+            if(upg.type === 'stealth') state.stats.traceResist = upg.lvl * 1.5;
+            if(upg.type === 'income') state.stats.passiveIncome = upg.lvl * 5;
+
+            if(isNew) log(`Upgrade ${upg.name} instalado.`, "success");
         }
 
         function cleanLogs() {
             if(state.money >= 150) {
                 state.money -= 150;
-                state.trace = Math.max(0, state.trace - 20);
-                log("Rastros ofuscados (-$150).", "info");
+                state.trace = Math.max(0, state.trace - 25);
+                log("Logs limpos (-$150).", "info");
             } else {
-                log("Requer $150 para limpar logs.", "error");
+                log("Requer $150.", "error");
             }
         }
 
@@ -801,17 +837,15 @@
             else if(type === 'warn') div.className = 'text-yellow-500';
             else if(type === 'success') div.className = 'text-green-400';
             else div.className = 'text-cyan-300';
-            
             els.console.prepend(div);
             if(els.console.children.length > 30) els.console.lastChild.remove();
         }
 
         function gameOver() {
-            alert("LOCALIZAÇÃO COMPROMETIDA. SISTEMA EXPOSTO.\n\nFIM DE JOGO.");
+            alert("VOCÊ FOI PEGO. FIM DE JOGO.\nO progresso será reiniciado.");
+            localStorage.removeItem('cyberBreachSave');
             location.reload();
         }
-
-        window.onload = init;
 
     </script>
 </body>
