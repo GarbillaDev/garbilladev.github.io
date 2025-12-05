@@ -174,15 +174,21 @@
           </div>
         </article>
 
-        <!-- OVERBYTE OS GAME (AGORA AJUSTADO) -->
-        <article id="overbyteos" class="panel">
-          <h2>OverByte OS Game</h2>
+<!-- OVERBYTE OS GAME (game.html) -->
+<article id="overbyteos" class="panel">
+  <h2>OverByte OS Game</h2>
 
-          <!-- Tamanho automático perfeito -->
-          <iframe src="game.html"
-            style="width: 100%; height: calc(100vh - 180px); border: 2px solid #0f0; border-radius: 8px;"
-            title="OverByte OS Game">
-          </iframe>
+  <!-- IFRAME NO FORMATO 16:9, SEM QUEBRAR O LAYOUT -->
+  <iframe src="game.html"
+    style="
+      width: 100%;
+      height: calc(100vh - 180px);
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      display: block;
+    "
+    title="OverByte OS Game">
+  </iframe>
 
           <p style="color:#aaa">Game Educativo <strong>game.html</strong>. diverta-se.</p>
         </article>
